@@ -26,17 +26,24 @@ class usersDB {
 
 class Program {
 
-    static List<usersDB> usersDB = new List<usersDB> {
+    static List<usersDB> usersDB = [
         new("Dark Araujo", "dk", "dk", "dk@example.com")
-    };
+    ];
 
     static List<Atendente> atendentes = [
 
-        new Atendente(1, "João", "12345678901"),
-        new Atendente(2, "Maria", "98765432109")
+        new Atendente("João", "12345678901"),
+        new Atendente("Maria", "98765432109")
     ];
 
-    public static List<Relatorio> relatorio = [
+    List<Usuario> usuarios = [
+        new Usuario("Carlos", "12345678901", "carlos@example.com"),
+        new Usuario("Ana", "98765432109", "ana@example.com")
+    ];
+
+    public static List<Produto> produtos = [];
+
+    public static List<Relatorio> relatorios = [
         new Relatorio{Atendente = atendentes[0], Documento = "12345678901", Total = 100.50m, DataHora = "01/01/2023 10:30" },
         new Relatorio{Atendente = atendentes[1], Documento = "98765432109", Total = 200.75m, DataHora = "01/01/2023 11:15" },
         new Relatorio{Atendente = atendentes[0], Documento = "NULO", Total = 150.25m, DataHora = "01/01/2023 12:45" }
@@ -149,6 +156,12 @@ class Program {
         switch (option) {
             case 1:
                 Vendas();
+                Admin();
+                break;
+
+            case 2:
+                EstoqueMenu();
+                Admin();
                 break;
 
 
@@ -181,7 +194,7 @@ class Program {
         Console.Clear();
         Logo();
         // Consolida relatórios com o mesmo ID
-        var consolidado = relatorio
+        var consolidado = relatorios
             .GroupBy(r => r.Id)
             .Select(g => new Relatorio {
                 Id = g.Key,
@@ -208,7 +221,120 @@ class Program {
         Console.ReadKey();
     }
 
-    public static string FormatCPF(string cpf) => cpf.Length == 11 ? $"{cpf.Substring(0, 3)}.{cpf.Substring(3, 3)}.{cpf.Substring(6, 3)}-{cpf.Substring(9, 2)}" : cpf;
+    public static void EstoqueMenu() {
+        Console.Clear();
+        Logo();
+
+        ListarProduto();
+
+        int option;
+        Console.WriteLine("-------------------------------------------------------------------------------------------------");
+        Console.WriteLine("1 | CADASTRAR NOVO PRODUTO");
+        Console.WriteLine("2 | ATUALIZAR PRODUTO");
+        Console.WriteLine("3 | REMOVER PRODUTO");
+        Console.WriteLine("3 | RETORNAR AO MENU PRINCIPAL");
+        Console.WriteLine("-------------------------------------------------------------------------------------------------");
+        Console.WriteLine("Qual opcao voce deseja acessar? ");
+
+        if (!int.TryParse(Console.ReadLine(), out option)) {
+            Console.WriteLine("Digite uma opção válida!");
+            Console.WriteLine("Pressione qualquer tecla para continuar..");
+            EstoqueMenu();
+        }
+
+        do {
+            switch (option) {
+                case 1:
+                    CadastrarProduto();
+                    break;
+
+                case 2:
+                    break;
+
+                case 3:
+                    break;
+
+                case 4:
+                    Admin();
+                    break;
+
+                default:
+                    EstoqueMenu();
+                    break;
+            }
+        }while (option != 0);
+
+
+    }
+
+    public static void CadastrarProduto() {
+        Console.Clear();
+        Logo();
+
+        Console.WriteLine("Cadastrar Produto:");
+        
+        Console.WriteLine("Digite o código do produto: ");
+        int codProduto = int.Parse(Console.ReadLine());
+
+        Console.WriteLine("Digite o nome do produto: ");
+        var nomeProduto = Console.ReadLine();
+
+        Console.WriteLine("Digite o valor gasto por unidade do produto: ");
+        decimal valorGastoProduto = decimal.Parse(Console.ReadLine());
+
+        Console.WriteLine("Digite o valor de venda por unidade do produto: ");
+        decimal valorVendaProduto = decimal.Parse(Console.ReadLine());
+
+        Console.WriteLine("Digite a quantidade do produto: ");
+        float quantidadeProduto = float.Parse(Console.ReadLine());
+
+        Console.WriteLine("As informacoes acima estao corretas?");
+        Console.WriteLine("S | SIM  /  N | NAO");
+        ConsoleKeyInfo yesOrNo = Console.ReadKey();
+        Console.WriteLine();
+
+        while(true){
+            switch (yesOrNo.Key) {
+                case ConsoleKey.S:
+                    Produto newProduct = new Produto(codProduto, nomeProduto, valorGastoProduto, valorVendaProduto, quantidadeProduto);
+                    produtos.Add(newProduct);
+
+                    Console.WriteLine("Sucesso! Produto registrado no sistema. Pressione qualquer tecla para continuar.");
+                    Console.ReadKey();
+                    EstoqueMenu();
+                    break;
+
+                case ConsoleKey.N:
+                    Console.WriteLine("Operacao cancelada! Pressione qualquer tecla para continuar.");
+                    Console.ReadKey();
+                    break;
+                default:
+                    break;
+
+            }
+        }
+
+
+    }
+
+    public static void ListarProduto() {
+        Console.Clear();
+        Logo();
+
+        Console.WriteLine("Lista de Produtos:");
+        if (produtos.Count == 0) {
+            Console.WriteLine("Nenhum produto cadastrado.");
+            return;
+        }
+
+        foreach (var produto in produtos) {
+            Console.WriteLine($"🔹 {produto.Cod} - {produto.Nome} | Compra: {produto.ValorCompra:C} | Venda: {produto.ValorVenda:C} | Quantidade: {produto.Quantidade}");
+        }
+
+
+    }
+
+        public static string FormatCPF(string cpf) => cpf.Length == 11 ? $"{cpf.Substring(0, 3)}.{cpf.Substring(3, 3)}.{cpf.Substring(6, 3)}-{cpf.Substring(9, 2)}" : cpf;
 
 
 
