@@ -5,6 +5,7 @@ using System.Diagnostics.Metrics;
 using System.Security.Cryptography;
 using System.Linq;
 using PIM2PAraujo.Models;
+using System.Globalization;
 
 class usersDB {
     private static int _nextId = 1;
@@ -25,7 +26,7 @@ class usersDB {
 }
 
 class Program {
-
+    
     static List<usersDB> usersDB = [
         new("Dark Araujo", "dk", "dk", "dk@example.com")
     ];
@@ -49,7 +50,6 @@ class Program {
         new Relatorio{Atendente = atendentes[0], Documento = "NULO", Total = 150.25m, DataHora = "01/01/2023 12:45" }
     ];
 
-
     // Variável estática para armazenar o usuário logado
     private static usersDB _usuarioLogado;
 
@@ -67,7 +67,7 @@ class Program {
     }
 
     static void Main(string[] args) {
-
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
 
         Logo();
         LoginMenu();
@@ -76,21 +76,23 @@ class Program {
     static void Logo() {
         Console.Clear();
 
-        Console.WriteLine("-------------------------------------------------------------------------------------------------");
-        Console.WriteLine("              __  __           __  _    ____           _ __                                      ");
-        Console.WriteLine("             / / / /___  _____/ /_(_/  / _________  __(_/ /_ ____  _______________				");
-        Console.WriteLine("            / /_/ / __ \\/ ___/ __/ /  / /_/ ___/ / / / / __// __ \\/ _ \\/ ___/ ___/			");
-        Console.WriteLine("           / __  / /_/ / /  / /_/ /  / __/ /  / /_/ / / /_ / / / /  __(__  (__  )  				");
-        Console.WriteLine("          /_/ /_/\\____/_/   \\__/_/  /_/ /_/   \\__,_/_/\\__//_/ /_/\\___/____/____/   		    \n");
-        Console.WriteLine("-------------------------------------------------------------------------------------------------");
+        Borda();
+        CentralizarTexto("       __  __           __  _    ____           _ __                        ");
+        CentralizarTexto("     / / / /___  _____/ /_(_/  / _________  __(_/ /_ ____  _______________");
+        CentralizarTexto("    / /_/ / __ \\/ ___/ __/ /  / /_/ ___/ / / / / __// __ \\/ _ \\/ ___/ ___/");
+        CentralizarTexto("  / __  / /_/ / /  / /_/ /  / __/ /  / /_/ / / /_ / / / /  __(__  (__  )");
+        CentralizarTexto("/_/ /_/\\____/_/   \\__/_/  /_/ /_/   \\__,_/_/\\__//_/ /_/\\___/____/____/");
+        Console.WriteLine();
+        Borda();
     }
+
 
     static void LoginMenu() {
         Console.Clear();
         Logo();
 
         Console.WriteLine("Digite seu user: ");
-        var username = Console.ReadLine();
+        var username = Console.ReadLine()?.Trim(); ;
         if (username == null) {
             Console.WriteLine("Digite um user válido");
             Console.ReadKey();
@@ -98,7 +100,7 @@ class Program {
         }
 
         Console.WriteLine("Digite sua senha");
-        string password = Console.ReadLine();
+        string password = Console.ReadLine()?.Trim(); ;
         if (password == null) {
             Console.WriteLine("Digite uma senha válida");
             Console.ReadKey();
@@ -130,10 +132,12 @@ class Program {
         Console.BackgroundColor = ConsoleColor.White;
         Console.ForegroundColor = ConsoleColor.Black;
         Console.Clear();
+        Console.CursorVisible = false;
 
         Logo();
-        Console.WriteLine($"\t\tSeja Bem Vindo, {UsuarioLogado.Name}");
-        Console.WriteLine("-------------------------------------------------------------------------------------------------");
+        CentralizarTexto($"Seja Bem Vindo, {UsuarioLogado.Name}");
+        Borda();
+
         Console.WriteLine("1 | VENDAS");
         Console.WriteLine("2 | ESTOQUE");
         Console.WriteLine("3 | CLIENTE");
@@ -141,18 +145,20 @@ class Program {
         Console.WriteLine("5 | USUARIOS");
         Console.WriteLine("6 | INFORMACOES DO SISTEMA");
         Console.WriteLine("7 | SAIR");
-        Console.WriteLine("-------------------------------------------------------------------------------------------------");
+        Borda();
         Console.WriteLine("Qual opcao voce deseja acessar? ");
 
-        int option;
+        Console.SetCursorPosition(5, Console.WindowHeight - 4);
+        Console.Write("💡 Use as setas para navegar ou digite um ID para vender.");
 
-        if (!int.TryParse(Console.ReadLine(), out option)) {
-            Console.WriteLine("Digite uma opção válida!");
-            Console.WriteLine("Pressione qualquer tecla para continuar..");
+        ConsoleKeyInfo caractere = Console.ReadKey(intercept: true);
+
+        if (!char.IsDigit(caractere.KeyChar)) {
+            MostrarMensagem("❌ Opção inválida! Tente novamente.", ConsoleColor.Red);
             Admin();
         }
 
-
+        int option = int.Parse(caractere.KeyChar.ToString());
         switch (option) {
             case 1:
                 Vendas();
@@ -163,7 +169,6 @@ class Program {
                 EstoqueMenu();
                 Admin();
                 break;
-
 
             case 7:
                 Console.Clear();
@@ -192,6 +197,7 @@ class Program {
 
     public static void Vendas() {
         Console.Clear();
+        Console.CursorVisible = false;
         Logo();
         // Consolida relatórios com o mesmo ID
         var consolidado = relatorios
@@ -223,6 +229,7 @@ class Program {
 
     public static void EstoqueMenu() {
         Console.Clear();
+        Console.CursorVisible = false;
         Logo();
 
         ListarProduto();
@@ -241,7 +248,7 @@ class Program {
             Console.WriteLine("Pressione qualquer tecla para continuar..");
             EstoqueMenu();
         }
-
+        
         do {
             switch (option) {
                 case 1:
@@ -249,9 +256,11 @@ class Program {
                     break;
 
                 case 2:
+                    AtualizarProduto();
                     break;
 
                 case 3:
+                    InativarProduto();
                     break;
 
                 case 4:
@@ -262,17 +271,18 @@ class Program {
                     EstoqueMenu();
                     break;
             }
-        }while (option != 0);
+        } while (option != 0);
 
 
     }
 
     public static void CadastrarProduto() {
         Console.Clear();
+        Console.CursorVisible = true;
         Logo();
 
         Console.WriteLine("Cadastrar Produto:");
-        
+
         Console.WriteLine("Digite o código do produto: ");
         int codProduto = int.Parse(Console.ReadLine());
 
@@ -280,34 +290,37 @@ class Program {
         var nomeProduto = Console.ReadLine();
 
         Console.WriteLine("Digite o valor gasto por unidade do produto: ");
-        decimal valorGastoProduto = decimal.Parse(Console.ReadLine());
+        decimal valorGastoProduto = decimal.Parse(Console.ReadLine()?.Trim());
 
         Console.WriteLine("Digite o valor de venda por unidade do produto: ");
-        decimal valorVendaProduto = decimal.Parse(Console.ReadLine());
+        decimal valorVendaProduto = decimal.Parse(Console.ReadLine()?.Trim());
 
         Console.WriteLine("Digite a quantidade do produto: ");
-        float quantidadeProduto = float.Parse(Console.ReadLine());
+        float quantidadeProduto = float.Parse(Console.ReadLine()?.Trim());
 
         Console.WriteLine("As informacoes acima estao corretas?");
         Console.WriteLine("S | SIM  /  N | NAO");
         ConsoleKeyInfo yesOrNo = Console.ReadKey();
         Console.WriteLine();
 
-        while(true){
+        while (true) {
             switch (yesOrNo.Key) {
                 case ConsoleKey.S:
-                    Produto newProduct = new Produto(codProduto, nomeProduto, valorGastoProduto, valorVendaProduto, quantidadeProduto);
+                    Produto newProduct = new Produto(codProduto, nomeProduto, valorGastoProduto, valorVendaProduto, quantidadeProduto, true);
                     produtos.Add(newProduct);
 
-                    Console.WriteLine("Sucesso! Produto registrado no sistema. Pressione qualquer tecla para continuar.");
+                    Console.WriteLine("Sucesso! Produto registrado no sistema. Pressione qualquer tecla para voltar ao Menu de Estoque.");
                     Console.ReadKey();
                     EstoqueMenu();
                     break;
 
+                case ConsoleKey.Escape:
                 case ConsoleKey.N:
-                    Console.WriteLine("Operacao cancelada! Pressione qualquer tecla para continuar.");
+                    Console.WriteLine("Operacao cancelada! Pressione qualquer tecla para voltar ao Menu de Estoque.");
                     Console.ReadKey();
+                    EstoqueMenu();
                     break;
+
                 default:
                     break;
 
@@ -320,22 +333,155 @@ class Program {
     public static void ListarProduto() {
         Console.Clear();
         Logo();
+        string texto = "🛒 LISTA DE PRODUTOS";
 
-        Console.WriteLine("Lista de Produtos:");
+        int larguraJanela = Console.WindowWidth;
+        int espacoEsquerdo = (larguraJanela - texto.Length) / 2;
+        string textoCentralizado = texto.PadLeft(espacoEsquerdo + texto.Length);
+
+        //Console.WriteLine("============================================");
+        Console.WriteLine(textoCentralizado);
+
+        Borda();
+        Console.WriteLine("ID   Nome         Compra  Venda  Qtde  Total");
+        Borda();
         if (produtos.Count == 0) {
             Console.WriteLine("Nenhum produto cadastrado.");
             return;
         }
 
         foreach (var produto in produtos) {
-            Console.WriteLine($"🔹 {produto.Cod} - {produto.Nome} | Compra: {produto.ValorCompra:C} | Venda: {produto.ValorVenda:C} | Quantidade: {produto.Quantidade}");
+            if (!produto.Ativo) {
+                
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine($"{produto.Cod, 20} - {produto.Nome} | Compra: {produto.ValorCompra:C} | Venda: {produto.ValorVenda:C} | Quantidade: {produto.Quantidade}");
+                Console.ForegroundColor = ConsoleColor.Black;
+
+            } else {
+                Console.WriteLine($"{produto.Cod, -4} {produto.Nome, -12} {produto.ValorCompra,6:C} {produto.ValorVenda,6:C} {produto.Quantidade, 5} {Convert.ToDecimal(produto.Quantidade)*produto.ValorVenda}");
+
+            }
         }
 
 
     }
 
-        public static string FormatCPF(string cpf) => cpf.Length == 11 ? $"{cpf.Substring(0, 3)}.{cpf.Substring(3, 3)}.{cpf.Substring(6, 3)}-{cpf.Substring(9, 2)}" : cpf;
+    public static void AtualizarProduto() {
+        Console.WriteLine("Digite o ID do produto que deseja atualizar: ");
+        if (!int.TryParse(Console.ReadLine(), out int id)) {
+            Console.WriteLine("ID inválido! Tente novamente.");
+            return;
+        }
+
+        Produto produto = produtos.FirstOrDefault(p => p.Cod == id);
+
+        if (produto == null) {
+            Console.WriteLine("Produto não encontrado");
+            return;
+        }
+
+        Console.WriteLine("Produto encontrado! Detalhes atuais");
+        produto.ExibirDetalhes();
+
+        Console.WriteLine("\nDigite os novos dados (deixe em branco para manter o valor atual):");
+
+        Console.WriteLine("Novo nome: ");
+        string newName = Console.ReadLine();
+        if (!string.IsNullOrWhiteSpace(newName)) {
+            produto.Nome = newName;
+        }
+
+        Console.WriteLine("Novo preco de compra: ");
+        decimal newPrice = decimal.Parse(Console.ReadLine()?.Trim());
+        produto.ValorCompra = newPrice;
+
+        Console.WriteLine("Novo preco de venda: ");
+        decimal newSalePrice = decimal.Parse(Console.ReadLine()?.Trim());
+        produto.ValorVenda = newSalePrice;
+
+        Console.WriteLine("Nova quantidade: ");
+        int newQuantity = int.Parse(Console.ReadLine()?.Trim());
+        produto.Quantidade = newQuantity;
 
 
+        Console.WriteLine("\nProduto atualizado com sucesso! Detalhes atualizados: ");
+        produto.ExibirDetalhes();
+        Console.ReadKey();
+        EstoqueMenu();
+    }
 
+    public static void InativarProduto() {
+        Console.WriteLine("Digite o ID do produto que deseja inativar: ");
+        if (!int.TryParse(Console.ReadLine(), out int id)) {
+            Console.WriteLine("ID inválido! Tente novamente.");
+            return;
+        }
+
+        Produto produto = produtos.FirstOrDefault(p => p.Cod == id);
+
+        if (produto == null) {
+            Console.WriteLine("Produto não encontrado");
+            return;
+        }
+
+        if (!produto.Ativo) {
+            Console.WriteLine("O produto já está inativo! Deseja ativa-lo?");
+        } else {
+            Console.WriteLine("Deseja realmente inativar o produto?");
+        }
+
+        Console.WriteLine("S | SIM  /  N | NAO");
+        ConsoleKeyInfo yesOrNo = Console.ReadKey();
+        Console.WriteLine();
+
+        while (true) {
+            switch (yesOrNo.Key) {
+                case ConsoleKey.S:
+                    if (!produto.Ativo) {
+                        produto.Ativo = true;
+                        Console.WriteLine($"Sucesso! Produto {produto.Nome} ativado novamente.");
+                    } else if (produto.Ativo) {
+                        produto.Ativo = false;
+                        Console.WriteLine($"Sucesso! Produto {produto.Nome} inativado.");
+                    }
+                    
+                    Console.WriteLine("Pressione qualquer tecla para voltar ao Menu de Estoque.");
+                    Console.ReadKey();
+                    EstoqueMenu();
+                    break;
+                case ConsoleKey.Escape:
+                case ConsoleKey.N:
+                    Console.WriteLine("Operacao cancelada! Pressione qualquer tecla para voltar ao Menu de Estoque.");
+                    Console.ReadKey();
+                    EstoqueMenu();
+                    break;
+                default:
+                    break;
+
+            }
+        }
+
+    }
+
+    public static string FormatCPF(string cpf) => cpf.Length == 11 ? $"{cpf.Substring(0, 3)}.{cpf.Substring(3, 3)}.{cpf.Substring(6, 3)}-{cpf.Substring(9, 2)}" : cpf;
+
+    static void CentralizarTexto(string texto) {
+        int larguraConsole = Console.WindowWidth;
+        int espacos = (larguraConsole - texto.Length) / 2;
+        Console.WriteLine(texto.PadLeft(texto.Length + espacos));
+    }
+
+    static void Borda() {
+        int larguraConsole = Console.WindowWidth;
+        string borda = new string('-', larguraConsole);
+        Console.WriteLine(borda);
+    }
+
+    static void MostrarMensagem(string mensagem, ConsoleColor cor) {
+        Console.ForegroundColor = cor;
+        Console.SetCursorPosition(5, Console.WindowHeight - 1);
+        Console.WriteLine(mensagem);
+        Console.ResetColor();
+        Thread.Sleep(1400);
+    }
 }
