@@ -30,10 +30,16 @@ class Program {
         new("Dark Araujo", "dk", "dk", "dk@example.com")
     };
 
+    static List<Atendente> atendentes = [
+
+        new Atendente(1, "João", "12345678901"),
+        new Atendente(2, "Maria", "98765432109")
+    ];
+
     public static List<Relatorio> relatorio = [
-        new Relatorio{ Atendente = "João", Documento = "12345678901", Total = 100.50m, DataHora = "01/01/2023 10:30" },
-        new Relatorio{Atendente = "Maria", Documento = "98765432109", Total = 200.75m, DataHora = "01/01/2023 11:15" },
-        new Relatorio{Atendente = "João", Documento = "NULO", Total = 150.25m, DataHora = "01/01/2023 12:45" }
+        new Relatorio{Atendente = atendentes[0], Documento = "12345678901", Total = 100.50m, DataHora = "01/01/2023 10:30" },
+        new Relatorio{Atendente = atendentes[1], Documento = "98765432109", Total = 200.75m, DataHora = "01/01/2023 11:15" },
+        new Relatorio{Atendente = atendentes[0], Documento = "NULO", Total = 150.25m, DataHora = "01/01/2023 12:45" }
     ];
 
 

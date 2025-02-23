@@ -12,7 +12,7 @@ namespace PIM2PAraujo.Models
         private static int _nextId = 1;
 
         public int Id { get; set; }
-        public string Atendente { get; set; }
+        public Atendente Atendente { get; set; }
         public string Documento { get; set; }
         public decimal Total { get; set; }
         public string DataHora { get; set; }
@@ -35,7 +35,7 @@ namespace PIM2PAraujo.Models
             
 
             if (Documento != "NULO") Documento = Program.FormatCPF(Documento);
-            Console.WriteLine($" {Id,-5} {Atendente,-14} {Documento,-16} {Total,-10} {DataHora}");
+            Console.WriteLine($" {Id,-5} {Atendente.Nome,-14} {Documento,-16} {Total,-10} {DataHora}");
 
         }
 
