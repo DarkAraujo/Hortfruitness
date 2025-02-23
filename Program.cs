@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 using System.Security.Cryptography;
 using System.Linq;
+using PIM2PAraujo.Models;
 
 class usersDB {
     private static int _nextId = 1;
@@ -23,27 +24,17 @@ class usersDB {
     }
 }
 
-class Relatorio {
-    private static int _nextId = 1;
-    public int Id { get; set; }
-    public string Atendente { get; set; }
-    public string Documento { get; set; }
-    public string Total { get; set; }
-    public string DataHora { get; set; }
-}
-
 class Program {
 
     static List<usersDB> usersDB = new List<usersDB> {
         new("Dark Araujo", "dk", "dk", "dk@example.com")
     };
 
-    public static List<Relatorio> relatorio = new List<Relatorio>
-    {
-        new() { Id = 1, Atendente = "João", Documento = "12345678901", Total = "100.50", DataHora = "01/01/2023 10:30" },
-        new() { Id = 2, Atendente = "Maria", Documento = "98765432109", Total = "200.75", DataHora = "01/01/2023 11:15" },
-        new() { Id = 3, Atendente = "João", Documento = "NULO", Total = "150.25", DataHora = "01/01/2023 12:45" }
-    };
+    public static List<Relatorio> relatorio = [
+        new Relatorio{ Atendente = "João", Documento = "12345678901", Total = 100.50m, DataHora = "01/01/2023 10:30" },
+        new Relatorio{Atendente = "Maria", Documento = "98765432109", Total = 200.75m, DataHora = "01/01/2023 11:15" },
+        new Relatorio{Atendente = "João", Documento = "NULO", Total = 150.25m, DataHora = "01/01/2023 12:45" }
+    ];
 
 
     // Variável estática para armazenar o usuário logado
@@ -181,6 +172,8 @@ class Program {
     }
 
     public static void Vendas() {
+        Console.Clear();
+        Logo();
         // Consolida relatórios com o mesmo ID
         var consolidado = relatorio
             .GroupBy(r => r.Id)
@@ -188,26 +181,28 @@ class Program {
                 Id = g.Key,
                 Atendente = g.First().Atendente,
                 Documento = g.First().Documento,
-                Total = g.Sum(r => float.Parse(r.Total)).ToString("F2"),
+                Total = g.Sum(r => r.Total),
                 DataHora = g.First().DataHora
             }).ToList();
 
-        // Exibe o relatório
         Console.WriteLine("Relatório de Vendas:");
         Console.WriteLine(" ID  | ATENDENTE    | CPF/Cliente   | TOTAL   | DATA/HORA");
-        consolidado.ForEach(r => {
-            if (r.Documento != "NULO") r.Documento = FormatCPF(r.Documento);
-            Console.WriteLine($" {r.Id,-5} {r.Atendente,-14} {r.Documento,-16} {r.Total,-10} {r.DataHora}");
-        });
 
-        float totalGeral = consolidado.Sum(r => float.Parse(r.Total));
+        foreach (var relatorio in consolidado) {
+            relatorio.ExibirInformacoes();
+        }
+
+
+        // Calcula o total geral
+        decimal totalGeral = consolidado.Sum(r => r.Total);
+
         Console.WriteLine("_____________________________________________________________________");
-        Console.WriteLine($"Total: R${totalGeral:F2}\n");
+        Console.WriteLine($"Total Geral: {totalGeral:C}\n");
         Console.WriteLine("Pressione qualquer tecla para retornar ao menu de vendas...");
         Console.ReadKey();
     }
 
-    static string FormatCPF(string cpf) => cpf.Length == 11 ? $"{cpf.Substring(0, 3)}.{cpf.Substring(3, 3)}.{cpf.Substring(6, 3)}-{cpf.Substring(9, 2)}" : cpf;
+    public static string FormatCPF(string cpf) => cpf.Length == 11 ? $"{cpf.Substring(0, 3)}.{cpf.Substring(3, 3)}.{cpf.Substring(6, 3)}-{cpf.Substring(9, 2)}" : cpf;
 
 
 
